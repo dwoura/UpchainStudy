@@ -17,6 +17,26 @@ contract Bank {
         _;
     }
 
+    function updateTop3(address user, uint userBalance) internal {
+        for (uint i=0;i<top_three_Users.length; i++) {
+            if (top_three_Users[i] == user) {
+                top_three_Balances[i] = userBalance;
+                sortTop3();
+                return;
+            }
+        }
+
+        if (top_three_Users.length<3) {
+            top_three_Users.push(user);
+            top_three_Balances.push(userBalance);
+            sortTop3();
+        } else if (userBalance>top_three_Balances[2]) {
+            top_three_Users[2] = user;
+            top_three_Balances[2] = userBalance;
+            sortTop3();
+        }
+    }
+
     function deposit() external payable {
         balances[msg.sender] += msg.value;
 
@@ -32,25 +52,6 @@ contract Bank {
         return address(this).balance;
     }
 
-    function updateTop3(address user, uint userBalance) internal {
-        for (uint i = 0; i < top_three_Users.length; i++) {
-            if (top_three_Users[i] == user) {
-                top_three_Balances[i] = userBalance;
-                sortTop3();
-                return;
-            }
-        }
-
-        if (top_three_Users.length < 3) {
-            top_three_Users.push(user);
-            top_three_Balances.push(userBalance);
-            sortTop3();
-        } else if (userBalance > top_three_Balances[2]) {
-            top_three_Users[2] = user;
-            top_three_Balances[2] = userBalance;
-            sortTop3();
-        }
-    }
 
     function sortTop3() internal {
         for (uint i = 0; i < top_three_Users.length; i++) {
