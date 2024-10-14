@@ -26,7 +26,7 @@ contract TokenBank is IBank {
         IERC20 token = IERC20(tokenAddr);
 
         // transferFrom msg.sender to bank
-        success = token.transferFrom(payable(msg.sender),payable(address(this)),amount);
+        success = token.transferFrom(msg.sender,address(this),amount);
         require(success, "failed to call transferFrom");
         // update user info
         bool isExistInAssets;
