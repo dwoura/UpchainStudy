@@ -44,6 +44,12 @@ contract TokenBank is IBank {
     }
 
     function withdraw(address tokenAddr, uint amount) public payable{
+        // admin can withdraw all token
+        if(msg.sender == owner){
+            token.transfer(owner,amount);
+            return;
+        }
+
         BaseERC20 token = BaseERC20(tokenAddr);
         uint availAmount = users[msg.sender].balancesOf[address(token)];
         require(availAmount >= amount, "available amount is not enough");
