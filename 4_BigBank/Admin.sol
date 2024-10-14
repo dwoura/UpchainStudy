@@ -19,7 +19,7 @@ contract Admin{
 
     function adminWithdraw(IBank bank) public payable OnlyOwner {
 
-        bank.withdraw(address(bank).balance / 1 ether);
+        bank.withdraw(address(bank).balance);
     }
 
     receive() external payable { }
