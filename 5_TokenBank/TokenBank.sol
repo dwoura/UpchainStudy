@@ -23,7 +23,7 @@ contract TokenBank is IBank {
         // check allowance
         require(amount>0,"amount is empty");
         bool success;
-        BaseERC20 token = BaseERC20(tokenAddr);
+        BaseERC20 token = BaseERC20(tokenAddr); // 以后记得使用接口
 
         // transferFrom msg.sender to bank
         success = token.transferFrom(payable(msg.sender),payable(address(this)),amount);
