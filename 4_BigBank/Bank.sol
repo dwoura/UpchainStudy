@@ -70,8 +70,8 @@ contract Bank is IBank{
     }
 
     function withdraw(uint256 amount) public payable OnlyOwner  {
-        require(amount * 1 ether<= address(this).balance,"no enough value");
-        (bool success,)=msg.sender.call{value:amount*1 ether}("");
+        require(amount<= address(this).balance,"no enough value");
+        (bool success,)=msg.sender.call{value:amount}("");
         if(!success){
             revert WithdrawFailed();
         }

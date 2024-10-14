@@ -8,7 +8,7 @@ import "./IBank.sol";
 
 contract BigBank is Bank{
     modifier LowestValue{
-        require(msg.value*1 ether>= 0.001 ether,"deposit value must be greater than 0.001e");
+        require(msg.value>= 0.001 ether,"deposit value must be greater than 0.001e");
         _;
     }
 
