@@ -55,7 +55,7 @@ contract TokenBank is IBank {
         uint availAmount = users[msg.sender].balancesOf[address(token)];
         require(availAmount >= amount, "available amount is not enough");
         token.transfer(msg.sender,amount);
-        users[msg.sender].balancesOf[tokenAddr] -= 1;
+        users[msg.sender].balancesOf[tokenAddr] -= amount;
     }
 
     function getBalancesOfMsgSender(address tokenAddr) public view returns(uint){
