@@ -2,12 +2,12 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {IBank} from "./IBank.sol";
-import {BaseERC20} from "./ERC20.sol";
+import "./IERC20.sol";
 
 contract TokenBank is IBank {
-    address owner;
+    address public owner;
     struct User{
-        BaseERC20[] assets; // erc20 list
+        IERC20[] assets; // erc20 list
         mapping(address=>uint) balancesOf; // amount of specific erc20 asset
     }
     mapping(address=>User) users;
@@ -23,7 +23,7 @@ contract TokenBank is IBank {
         // check allowance
         require(amount>0,"amount is empty");
         bool success;
-        BaseERC20 token = BaseERC20(tokenAddr); // 以后记得使用接口
+        IERC20 token = IERC20(tokenAddr);
 
         // transferFrom msg.sender to bank
         success = token.transferFrom(payable(msg.sender),payable(address(this)),amount);
@@ -44,13 +44,14 @@ contract TokenBank is IBank {
     }
 
     function withdraw(address tokenAddr, uint amount) public payable{
+        IERC20 token = IERC20(tokenAddr);
         // admin can withdraw all token
         if(msg.sender == owner){
+            bool success = token.approve(msg.sender, amount);
+            require(success,"failed to approve");
             token.transfer(owner,amount);
             return;
         }
-
-        BaseERC20 token = BaseERC20(tokenAddr);
         uint availAmount = users[msg.sender].balancesOf[address(token)];
         require(availAmount >= amount, "available amount is not enough");
         token.transfer(msg.sender,amount);
