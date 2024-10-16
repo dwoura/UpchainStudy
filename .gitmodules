@@ -7,3 +7,6 @@
 [submodule "6_NFT/foundry/nft_market/lib/solmate"]
 	path = 6_NFT/foundry/nft_market/lib/solmate
 	url = https://github.com/transmissions11/solmate
+[submodule "6_NFT/foundry/nft_market/lib/openzeppelin-contracts"]
+	path = 6_NFT/foundry/nft_market/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
