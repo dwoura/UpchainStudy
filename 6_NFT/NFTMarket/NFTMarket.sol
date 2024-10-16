@@ -86,8 +86,6 @@ contract NFTMarket {
 
     function tokensReceived(address buyerAddr,address wantedNftAddr,uint) public {
         //转账erc20给 market 合约，触发tokensReceived()进来自动购买，listing pop。
-
-        //erc721receiver
         uint[] memory listingNftIds = listingNftId[wantedNftAddr];
         buyNFT(buyerAddr,wantedNftAddr,listingNftIds[listingNftIds.length-1]); //暂时默认购买 listing 最后一个
     }
