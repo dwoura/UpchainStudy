@@ -1,7 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity ^0.8.0;
 
-contract BaseERC20{
+import {IERC165} from "../../../solidity之路/FoundryDigger/lib/forge-std/src/interfaces/IERC165.sol";
+
+interface ITokenReceiver{
+    function tokensReceived(address operator,address from,uint256 amount, bytes memory data) external returns(bool);
+}
+
+contract BaseERC20 is IERC165{
+
     string public name;
     string public symbol;
     uint8 public decimals;
@@ -64,6 +71,25 @@ contract BaseERC20{
     function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
         // write your code here
         return allowances[_owner][_spender];
+    }
+
+    // 带钩子函数的转账
+    function transferWithCallback(address _to,uint _amount, bytes memory data) public returns(bool){
+        bool success;
+        success = transfer(_to, _amount);
+        require(success, "failed to transfer token");
+        if(!isContract(_to)){
+            // 不是合约地址则直接返回真，表示普通转账
+            return true;
+        }
+        // 若为合约地址，转账后调用其tokensReceived()方法
+        success = ITokenReceiver(_to).tokensReceived(address(this),msg.sender,_amount,data);
+        require(success, "failed to call tokensReceived()");
+        return true;
+    }
+
+    function isContract(address _addr) internal view returns(bool){
+        return _addr.code.length != 0;
     }
 
 }

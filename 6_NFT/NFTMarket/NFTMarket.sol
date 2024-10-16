@@ -84,7 +84,7 @@ contract NFTMarket {
         // 怎么判断721有无转账成功？？
     }
 
-    function tokensReceived(address buyerAddr,address wantedNftAddr,uint) public {
+    function tokensReceived(address, address from, uint value, bytes calldata data) public returns(bool) {
         //转账erc20给 market 合约，触发tokensReceived()进来自动购买，listing pop。
         uint[] memory listingNftIds = listingNftId[wantedNftAddr];
         buyNFT(buyerAddr,wantedNftAddr,listingNftIds[listingNftIds.length-1]); //暂时默认购买 listing 最后一个
