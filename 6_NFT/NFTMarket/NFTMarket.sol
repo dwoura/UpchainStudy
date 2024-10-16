@@ -4,9 +4,13 @@ pragma solidity ^0.8.26;
 
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC20} from "./IERC20.sol";
-
+import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import "./ITokenReceiver.sol";
 
 contract NFTMarket {
+    // 定义TokenReceiver的接口id, 用于查询 token 是否支持此接口
+    bytes4 private constant tokenReceiverInterfaceId = type(ITokenReceiver).interfaceId;
+
     address public owner;
     //address[] listing; // 已上架的nft地址
     mapping(address=>uint[]) listingNftId; // 已上架的指定 nft暂时没有按价格排序
@@ -55,7 +59,7 @@ contract NFTMarket {
         return true;
     }
 
-    function buyNFT(address buyer,address wantedNftAddr, uint nftId) public returns(bool){
+    function buyNFT(address buyer,address wantedNftAddr, uint nftId, bool isCalledByCallBack, uint tokensReceivedValue) public returns(bool){
         // nft转出给购买人
         // listing 减少库存
         // 下架状态
@@ -66,27 +70,43 @@ contract NFTMarket {
         good storage wantedNft = goods[wantedNftAddr][nftId];
         IERC20 erc20 = IERC20(wantedNft.currency);
         require(wantedNft.isListing, "this nft is unlisted");
-        require(erc20.balanceOf(buyer) >= erc20.allowance(buyer, address(this)) && erc20.allowance(buyer, address(this)) >= wantedNft.price, "buyer has no enough erc20");
         // 卖出前先交换到末尾再删除
         uint[] storage listingNftIds = listingNftId[wantedNftAddr];
         (listingNftIds[wantedNft.listingIndex],listingNftIds[listingNftIds.length-1]) = (listingNftIds[listingNftIds.length-1], listingNftIds[wantedNft.listingIndex]);
         listingNftIds.pop();
         // 下架状态
         wantedNft.isListing = false;
-        // 市场转出nft价格的token给卖家
-        bool success = erc20.transferFrom(buyer, wantedNft.seller, wantedNft.price); // 暂未设置手续费
-        require(success, "failed to transfer token to seller");
         // 市场转出 nft 给买家
         IERC721 erc721 = IERC721(wantedNftAddr);
         erc721.transferFrom(address(this),buyer,wantedNft.id);
+
+        // 市场转出nft价格的token给卖家
+        if(isCalledByCallBack){
+            // 若由回调函数调用，直接从市场转出对应代币给卖家
+            erc20.transfer(wantedNft.seller, tokensReceivedValue);
+        }else{
+            require(erc20.balanceOf(buyer) >= erc20.allowance(buyer, address(this)) && erc20.allowance(buyer, address(this)) >= wantedNft.price, "buyer has no enough erc20");
+            bool success = erc20.transferFrom(buyer, wantedNft.seller, wantedNft.price); // 暂未设置手续费
+            require(success, "failed to transfer token to seller");
+        }
 
         return true;
         // 怎么判断721有无转账成功？？
     }
 
-    function tokensReceived(address, address from, uint value, bytes calldata data) public returns(bool) {
+    function tokensReceived(address, address from, uint value, bytes calldata data) public returns(bool){
+        // 注意限定token协议
+        // 通过调用发送者地址的方法，检查接口id是否已经注册
+        require(IERC165(msg.sender).supportsInterface(tokenReceiverInterfaceId) ,"not expected token");
+
         //转账erc20给 market 合约，触发tokensReceived()进来自动购买，listing pop。
+        // 解码携带的字节码 data 获取想要购买的 nft 地址。
+        address wantedNftAddr = abi.decode(data, (address));
         uint[] memory listingNftIds = listingNftId[wantedNftAddr];
-        buyNFT(buyerAddr,wantedNftAddr,listingNftIds[listingNftIds.length-1]); //暂时默认购买 listing 最后一个
+        buyNFT(from,wantedNftAddr,listingNftIds[listingNftIds.length-1], true, value); //暂时默认购买 listing 最后一个
+        return true;
     }
 }
+
+// 直接转账进来钱在市场里，需要由市场转到卖家账户
+// 区分回调与非回调进入 buy

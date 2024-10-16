@@ -1,80 +1,25 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.26;
 
-import {IERC165} from "../../../solidity之路/FoundryDigger/lib/forge-std/src/interfaces/IERC165.sol";
+import {BaseERC20} from "./ERC20.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import "./ITokenReceiver.sol";
 
-interface ITokenReceiver{
-    function tokensReceived(address operator,address from,uint256 amount, bytes memory data) external returns(bool);
-}
+contract ERC20Hook is BaseERC20, ERC165{
+    // 接口ID，用于注册
+    bytes4 private constant tokenReceiverInterfaceId = type(ITokenReceiver).interfaceId;
 
-contract BaseERC20 is IERC165{
-
-    string public name;
-    string public symbol;
-    uint8 public decimals;
-
-    uint256 public totalSupply;
-
-    mapping (address => uint256) balances;
-
-    mapping (address => mapping (address => uint256)) allowances;
-
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-
-    constructor() {
-        // write your code here
-        // set name,symbol,decimals,totalSupply
-        name = "BaseERC20";
-        symbol = "BERC20";
-        decimals = 18;
-        totalSupply = 100000000 ether;
-        balances[msg.sender] = totalSupply;
+    constructor(){
     }
 
-    function balanceOf(address _owner) public view returns (uint256 balance) {
-        // write your code here
-        balance = balances[_owner];
-    }
-
-    function transfer(address _to, uint256 _value) public returns (bool success) {
-        // write your code here
-        require(balances[msg.sender] >= _value, "ERC20: transfer amount exceeds balance");
-
-        balances[msg.sender] -= _value;
-        balances[_to] += _value;
-        emit Transfer(msg.sender, _to, _value);
-        return true;
-    }
-
-    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
-        // write your code here
-        require(balances[_from] >= _value, "ERC20: transfer amount exceeds balance");
-        require(allowances[_from][msg.sender] >= _value, "ERC20: transfer amount exceeds allowance");
-
-        balances[_from] -= _value;
-        balances[_to] += _value;
-        allowances[_from][msg.sender] -= _value;
-        emit Transfer(_from, _to, _value);
-        return true;
-    }
-
-    function approve(address _spender, uint256 _value) public returns (bool success) {
-        // write your code here
-        require(_spender != address(0));
-
-        allowances[msg.sender][_spender] = _value;
-        emit Approval(msg.sender, _spender, _value);
-        return true;
-    }
-
-    function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
-        // write your code here
-        return allowances[_owner][_spender];
+    // 旧版注册方式已经移除，现改用重写supportsInterface方法。
+    // 重写 supportsInterface 方法来对外展暴露本协议支持 ITokenReceiver 的接口。
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == tokenReceiverInterfaceId;
     }
 
     // 带钩子函数的转账
-    function transferWithCallback(address _to,uint _amount, bytes memory data) public returns(bool){
+    function transferWithCallback(address _to,uint _amount,bytes memory data) public returns(bool){
         bool success;
         success = transfer(_to, _amount);
         require(success, "failed to transfer token");
@@ -83,7 +28,7 @@ contract BaseERC20 is IERC165{
             return true;
         }
         // 若为合约地址，转账后调用其tokensReceived()方法
-        success = ITokenReceiver(_to).tokensReceived(address(this),msg.sender,_amount,data);
+        success = ITokenReceiver(_to).tokensReceived(msg.sender,msg.sender,_amount,data);
         require(success, "failed to call tokensReceived()");
         return true;
     }
@@ -91,5 +36,4 @@ contract BaseERC20 is IERC165{
     function isContract(address _addr) internal view returns(bool){
         return _addr.code.length != 0;
     }
-
 }
