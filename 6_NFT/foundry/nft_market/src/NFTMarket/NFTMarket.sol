@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC20} from "./IERC20.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "./ITokenReceiver.sol";
+import "forge-std/console.sol";
 
 contract NFTMarket {
     // 定义TokenReceiver的接口id, 用于查询 token 是否支持此接口
@@ -13,7 +13,7 @@ contract NFTMarket {
 
     address public owner;
     //address[] listing; // 已上架的nft地址
-    mapping(address=>uint[]) listingNftId; // 已上架的指定 nft暂时没有按价格排序
+    mapping(address=>uint[]) listingNftId; // 已上架的指定nft 暂时没有按价格排序
 
     struct good{
         uint id;
@@ -83,6 +83,7 @@ contract NFTMarket {
         // 市场转出nft价格的token给卖家
         if(isCalledByCallBack){
             // 若由回调函数调用，直接从市场转出对应代币给卖家
+            require(tokensReceivedValue >= wantedNft.price, "buyer has no enough erc20");
             erc20.transfer(wantedNft.seller, tokensReceivedValue);
         }else{
             require(erc20.balanceOf(buyer) >= erc20.allowance(buyer, address(this)) && erc20.allowance(buyer, address(this)) >= wantedNft.price, "buyer has no enough erc20");
@@ -103,6 +104,7 @@ contract NFTMarket {
         // 解码携带的字节码 data 获取想要购买的 nft 地址。
         address wantedNftAddr = abi.decode(data, (address));
         uint[] memory listingNftIds = listingNftId[wantedNftAddr];
+        require(listingNftIds.length>0,"none of this nft address is listing");
         buyNFT(from,wantedNftAddr,listingNftIds[listingNftIds.length-1], true, value); //暂时默认购买 listing 最后一个
         return true;
     }

@@ -2,18 +2,16 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract MyERC721 is ERC721URIStorage {
-    using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
+    uint private _tokenIds;
 
     constructor() ERC721(unicode"Wensili", "Dwoura") {}
 
     function mint(address student, string memory tokenURI) public returns (uint256) {
-        _tokenIds.increment();
+        _tokenIds+=1;
 
-        uint256 newItemId = _tokenIds.current();
+        uint256 newItemId = _tokenIds;
         _mint(student, newItemId);
         _setTokenURI(newItemId, tokenURI);
 
