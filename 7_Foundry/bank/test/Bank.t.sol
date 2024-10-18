@@ -17,11 +17,10 @@ contract BankTest is Test{
     function test_EventDeposit() public {
         uint depositAmount = 1 ether;
 
-        vm.expectEmit(true, false, false, false);
-        emit Bank.Deposit(bob, depositAmount);
-        
+        vm.expectEmit(true, false, false, false); // 准备埋点
+        emit Bank.Deposit(bob, depositAmount);  // 埋具体哪个点
         vm.startPrank(bob);
-        bank.depositETH{value: depositAmount}();
+        bank.depositETH{value: depositAmount}(); // 触发埋点
         vm.stopPrank();
 
         assert(bank.balanceOf(bob) == depositAmount);
