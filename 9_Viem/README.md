@@ -1,4 +1,6 @@
 # Viem 上手
+## 参考链接
+https://learnblockchain.cn/article/8465
 ## 初始化文件夹
 npm init
 
@@ -20,3 +22,9 @@ npx tsc --init
 ## 运行pnpm start，终端会显示目前的区块高度。
 > viem-scripts@1.0.0 start /viem-playground/viem-scripts
 > ts-node index.ts
+
+## 若要交互，新建一个 abi.ts 文件
+我们需要 export const 文本，在变量内容末尾需要添加as const关键词，这样viem可以智能的读取里面的function信息。
+末尾添加 as const 是为了精确推断类型，例如：
+const example = 'hello';  // 推断为 string
+const exampleConst = 'hello' as const;  // 推断为 'hello'
