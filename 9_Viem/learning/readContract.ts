@@ -1,5 +1,5 @@
 // 读取指定nft地址的合约信息的示例
-import { createPublicClient, createWalletClient, http } from "viem";
+import { createPublicClient,getContract, createWalletClient, http } from "viem";
 import { mainnet } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 import dotenv from "dotenv";
@@ -24,33 +24,26 @@ const client = createPublicClient({
   transport: http(),
 });
 
+const contract = getContract({
+    address: address,
+    abi: abi,
+    client: client
+})
+
+async function readOwnerOf(tokenId: bigint){
+    const nftOwner = await contract.read.ownerOf([tokenId]);
+    console.log("owner of token no.1 nft is:\n",nftOwner);
+}
+
+async function readTokenUri(tokenId: bigint) {
+    const nftUri = await contract.read.tokenURI([tokenId]);
+    console.log("URI of token", tokenId,"nft is:\n",nftUri);
+}
+
 async function main() {
-    // const blockNumber = await client.getBlockNumber();
-    // console.log(blockNumber);
-  
-    const tokenId = 1;
+    const tokenId:bigint = BigInt(1);
     readOwnerOf(tokenId);
     readTokenUri(tokenId);
 }
 
-async function readOwnerOf(tokenId: number){
-    const nftOwner = await client.readContract({
-        address,
-        abi,
-        functionName: "ownerOf",
-        args: [BigInt(1)],
-    });
-  
-    console.log("owner of token no.1 nft is:\n",nftOwner);
-}
-
-async function readTokenUri(tokenId: number) {
-    const nftUri = await client.readContract({
-        address,
-        abi,
-        functionName: "tokenURI",
-        args: [BigInt(1)],
-    });
-    console.log("URI of token", tokenId,"nft is:\n",nftUri);
-}
 main();
