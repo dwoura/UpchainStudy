@@ -8,9 +8,7 @@ This guide provides step-by-step instructions on how to quickly set up a React p
 
 ## Steps to Create a React App
 
-1. `npm init react-app projectName`   (npm >= 6.0) 
-2. `cd path` and `npm start`
-3. `yarn add wagmi viem @tanstack/react-query`
+
    
 # React Catalog structure
 + node_module ------ 第三方资源
