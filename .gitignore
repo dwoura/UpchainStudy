@@ -2,3 +2,9 @@
 9_Viem/node_modules/
 
 9_Viem/.env
+
+09_Viem_Wagmi/.env
+
+09_Viem_Wagmi/node_modules/
+
+07_Foundry/bank/lib/
