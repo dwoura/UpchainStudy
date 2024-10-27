@@ -1,5 +1,4 @@
-@ts-nocheck
-
+//@ts-nocheck
 import { createPublicClient,getContract, createWalletClient, http } from "viem";
 import { mainnet } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";

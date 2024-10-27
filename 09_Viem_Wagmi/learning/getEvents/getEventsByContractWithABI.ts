@@ -6,7 +6,7 @@
 import { createPublicClient,getContract, http, formatUnits } from "viem";
 import { mainnet } from "viem/chains";
 import dotenv from "dotenv";
-import { usdCimplConfig } from "../src/generated"; // 使用相对路径前设置好 tsconfig 中的 baseUrl
+import { usdCimplConfig } from "../../src/generated";  // 如何相对路径??
 import { Address } from 'viem'; // 强类型地址类型
 
 dotenv.config();
@@ -49,40 +49,43 @@ async function getUSDCEvents(){
     });
 }
 
-// async function getLatest100EventsOfUSDC(){
-//     const latestBlock:bigint = await client.getBlockNumber();
-    
-//     const unwatch = contract.watchEvent.Transfer(
-//         {
-//             from: '0x0920D73e552605a81BD5434Ca25d3743EAf199a5',
-//             to: '0x0920D73e552605a81BD5434Ca25d3743EAf199a5'
-//         },
-//         { 
-//             fromBlock: latestBlock, // 前一百个区块
-//             onLogs: logs => {
+async function getLatest100EventsOfUSDC(){
+    const latestBlock:bigint = await client.getBlockNumber();
+    const decimals = await contract.read.decimals();
+    //const filter = await contract.createEventFilter.Transfer()
+    const unwatch = contract.watchEvent.Transfer(
+        {
+        },
+        { 
+            fromBlock: latestBlock, // 前一百个区块
+            onLogs: logs => {
+                    logs.forEach(async(log)=>{
+                        const block = await client.getBlock({blockNumber: log.blockNumber});
 
-//                     logs.forEach(log => {
-//                         console.log(
-//                             "从",
-//                             log.args.from?.toString(),
-//                             "转账给",
-//                             log.args.to?.toString(),
-//                             log.args.value?.toString(),
-//                             "USDC, 交易ID：",
-//                             log.transactionHash.toString()
-//                         );
-//                     });
+                        console.log(
+                            "从",
+                            log.args.from?.toString(),
+                            "转账给",
+                            log.args.to?.toString(),
+                            formatUnits(log.args.value as bigint, decimals ),
+                            "USDC, 交易ID:",
 
-//             },
-//             onError: error => console.error('Error:', error)
-//         }
-//     ); 
-// }
+                            log.transactionHash.toString(),
+                            "时间:",
+                            (new Date(Number(block.timestamp)*1000)).toLocaleString()
+                        );
+                    });
+
+            },
+            onError: error => console.error('Error:', error)
+        }
+    ); 
+}
 
 async function main() {
-    //getLatest100EventsOfUSDC();
+    getLatest100EventsOfUSDC();
 
-    getUSDCEvents();
+    //getUSDCEvents();
     
 }
 
