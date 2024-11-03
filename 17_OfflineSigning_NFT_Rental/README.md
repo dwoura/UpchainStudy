@@ -35,4 +35,6 @@ struct RentoutOrder {
 提交内容的：vercel.com上的可访问公共链接 和对应的仓库 github 链接。
 
 ### 提交链接
-已 fork 到项目中 https://github.com/dwoura/openspace-nftrent-study
+已提交到个人仓库中 https://github.com/dwoura/openspace-nftrent-study
+
+## 
