@@ -20,3 +20,6 @@ https://decert.me/challenge/faa435a5-f462-4f92-a209-3a7e8fdc4d81
 permitPrePay() : 调用token的 permit 进行授权
 claimNFT() : 通过默克尔树验证白名单，并利用 permitPrePay 的授权，转入 token 转出 NFT 。
 请贴出你的代码 github ，代码需包含合约，multicall 调用封装，Merkel 树的构建以及测试用例。
+
+默克尔树生成仓库：https://github.com/dwoura/UpchainStudy/tree/main/21_Gas_Optimization/merkleTreeWhiteList
+默克尔白名单合约仓库：https://github.com/dwoura/FoundryProject/blob/main/src/GasOptimazation/AirdopMerkleNFTMarket.sol
