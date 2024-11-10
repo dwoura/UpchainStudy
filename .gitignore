@@ -7850,3 +7850,5 @@
 15_Listen_USDCTransfer_Event/node_modules/
 
 19_StorageLayout/readContractPrivateVar/.idea/
+
+21_Gas_Optimization/merkleTreeWhiteList/node_modules/
